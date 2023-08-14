@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ankus_dblist</title>
+
+  <!-- Bootstrap CDN -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Favicon PC / Mobile-->
+  <!-- <link rel="shorcut icon" href="/common/images/fav_32.jpg"> -->
+  <link rel="shorcut icon" href="/common/images/favicon/fav_180.png">
+  <!-- CSS -->
+  <link rel="stylesheet" href="/common/css/reset.css">
+  <link rel="stylesheet" href="/common/css/font.css">
+
+  <!-- 프로젝트 페이지 CSS -->
+  <link rel="stylesheet" href="db/css/dblist.css">
+  <link rel="stylesheet" href="/common/css/header.css">
+
+
+  <!-- 프로젝트 페이지 SCRIPT -->
+
+  <!-- HTML5 JS File -->
+  <script src="/common/js/html5shiv.js"></script>
+  <script src="/common/js/respond.src.js"></script>
+  <!-- JQ PlugIn -->
+  <script src="/common/js/jquery-3.4.1.min.js"></script>
+  <!-- PreFix Free -->
+  <script src="/common/js/prefixfree.min.js"></script>
+
+  <script src="/db/js/dblist.js"></script>
+  <script src="/db/js/csv_workflow_add.js"></script>
+
+  <script src="/common/js/header.js"></script>
+</head>
+
+<body>
+  <div id="wrap">
+    <div class="modal_bg">
+      <div class="modal">
+        <h3 class="add_modal_title">DB연결 등록</h3>
+        <!-- <h3 class="edit_modal_title">DB연결 수정</h3> -->
+        <div class="modal_list">
+          <p class="db_connect_title">연결정보명</p>
+          <div class="db_connect_info">
+            <ul class="db_connect_info_txt">
+              <li><input type="text"></li>
+              <li>연결 정보명이 중복되었습니다.</li>
+              <li>사용 가능한 연결 정보명입니다.</li>
+            </ul>
+            <div class="select">
+              <div class="selected">
+                <div class="selected-value">DB 종류</div>
+                <div class="arrow"></div>
+              </div>
+              <ul>
+                <li class="option">MariaDB</li>
+                <li class="option">PostgreSQL</li>
+              </ul>
+            </div>
+          </div>
+          <ul class="db_connect_url">
+            <li>DataBase URL</li>
+            <li>
+              <input type="text">
+            </li>
+          </ul>
+          <div class="db_connect_inp">
+            <ul class="db_connect_port">
+              <li>DataBase PORT <span>(숫자)</span></li>
+              <li>
+                <input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+              </li>
+            </ul>
+            <ul class="db_connect_id" value="sss">
+              <li>DataBase 사용자 아이디</li>
+              <li>
+                <input type="text">
+              </li>
+            </ul>
+            <ul class="db_connect_password">
+              <li>DataBase 패스워드</li>
+              <li>
+                <input type="text">
+              </li>
+            </ul>
+            <ul class="db_connect_name">
+              <li>DataBase 이름</li>
+              <li>
+                <input type="text">
+              </li>
+            </ul>
+          </div>
+        </div>
+        <ul class="md_btn_list">
+          <button class="md_cancel">취소</button>
+          <button class="md_add">저장</button>
+        </ul>
+      </div>
+    </div>
+    <div class="delete_modal_bg">
+      <div class="delete_modal">
+        <h3 class="delete_txt">선택한 DB를 <br> 정말 삭제하시겠습니까?</h3>
+        <img src="/common/images/db/ex.svg" alt="엑스">
+        <ul class="modal_btn_list">
+          <li><button>취소</button></li>
+          <li><button>삭제</button></li>
+        </ul>
+      </div>
+    </div>
+    <div class="module_warning_bg">
+      <div class="module_warning_modal">
+        <h3 class="module_warning_txt">모듈 이름이 입력되지 않았습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <div class="complete_modal_bg">
+      <div class="complete_modal">
+        <h3 class="complete_txt">DB연결 등록이 완료되었습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <!-- Header -->
+    <header class="cf">
+      <div class="w1300">
+        <h1>
+          <a href="/workflow_list"><img src="/common/images/logo.svg" alt="로고"></a>
+        </h1>
+        <nav class="navbar">
+          <ul class="gnb">
+            <li><a href="/file">파일관리</a></li>
+            <li><a href="/workflow_list">워크플로우</a></li>
+            <li><a href="/dblist">DB조회</a></li>
+          </ul>
+          <div class="lnb">
+            <div class="lnb_user">
+              <img src="/common/images/user.svg" alt="사용자이미지">
+              <p sec:authentication="name"></p>
+            </div>
+            <ul>
+              <li sec:authorize="hasRole('관리자')"><a href="/admin">관리자페이지</a></li>
+              <li><a href="/mypage">마이페이지</a></li>
+              <li><a href="/logout">로그아웃</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- /Header -->
+    <!-- Main -->
+    <div class="main_all w1300 cf">
+      <h2>DB 조회</h2>
+      <!-- Main_left -->
+      <div class="main_left">
+        <h3>DB 연결정보</h3>
+        <button class="add">등록</button>
+        <button class="edit">수정</button>
+        <div class="search">
+          <input placeholder="데이터베이스 테이블 이름">
+          <p><img src="/common/images/db/filter.svg" alt="검색"></p>
+        </div>
+        <p class="search_info">필터 적용이 되어 있지 않습니다</p>
+        <div class="tree_all">
+        </div>
+      </div>
+      <!-- /Main_left -->
+      <!-- /Main_right -->
+      <div class="main_right cf">
+        <ul class="data_name">
+          <li>DB 상세</li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+        <div class="data_query">
+          <textarea placeholder="단일 SELECT만 가능합니다."></textarea>
+        </div>
+        <p class="query_notice">
+          <button class="query_btn" title="Ctrl + Enterznj">쿼리 실행</button>
+        </p>
+        <div class="table_wrap">
+          <p>데이터가 없습니다</p>
+          <table id="resizeMe" class="table">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+          <div class="border"></div>
+        </div>
+        <p class="search_result">rows : 0</p>
+      </div>
+      <!-- /Main_right -->
+    </div>
+    <!-- /Main -->
+    <!-- Footer -->
+    <footer>
+      <p>Copyright &copy; ankus 2022 .ONYCOM</p>
+    </footer>
+    <!-- /Footer -->
+  </div>
+</body>
+
+</html>

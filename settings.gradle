@@ -1,0 +1,2 @@
+rootProject.name = 'ankus_dasops_workflow'
+include 'ankus_dasops_common'

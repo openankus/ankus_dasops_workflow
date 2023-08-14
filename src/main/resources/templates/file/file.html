@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ankus_file</title>
+
+  <!-- Bootstrap CDN -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Favicon PC / Mobile-->
+  <!-- <link rel="shorcut icon" href="../common/images/fav_32.jpg"> -->
+  <link rel="shorcut icon" href="/common/images/favicon/fav_180.png">
+  <!-- CSS -->
+  <link rel="stylesheet" href="/common/css/reset.css">
+  <link rel="stylesheet" href="/common/css/font.css">
+  <link rel="stylesheet" href="/common/css/jquery.dataTables.css">
+<!--  <link rel="stylesheet" href="/common/css/disabled.css">-->
+
+  <!-- 프로젝트 페이지 CSS -->
+  <link rel="stylesheet" href="file/css/file.css">
+  <link rel="stylesheet" href="/common/css/header.css">
+
+  <!-- HTML5 JS File -->
+  <script src="/common/js/html5shiv.js"></script>
+  <script src="/common/js/respond.src.js"></script>
+  <!-- JQ PlugIn -->
+  <script src="/common/js/jquery-1.12.4.min.js"></script>
+  <script src="/common/js/jquery-3.3.1.min.js"></script>
+  <script src="/common/js/jquery-3.4.1.min.js"></script>
+  <!-- PreFix Free -->
+  <script src="/common/js/prefixfree.min.js"></script>
+
+  <!-- 프로젝트 페이지 SCRIPT -->
+  <script src="file/js/file.js"></script>
+  <script src="file/js/jquery.fileDownload.js"></script>
+
+  <script src="/common/js/header.js"></script>
+</head>
+<body>
+<div id="wrap">
+  <!-- modal -->
+  <div class="complete_modal_bg">
+    <div class="complete_modal">
+      <h3 class="complete_txt">???가 완료되었습니다.</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <button>확인</button>
+    </div>
+  </div>
+  <div class="warning_modal_bg">
+    <div class="warning_modal">
+      <h3 class="warning_txt">삭제할 사용자가 선택되지 않았습니다.</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <button>확인</button>
+    </div>
+  </div>
+  <div class="create_modal_bg">
+    <div class="create_modal">
+      <h3 class="create_txt">생성할 폴더명을 입력주세요.</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <input type="text">
+      <ul class="create_modal_btn_list">
+        <li><button>취소</button></li>
+        <li><button disabled class="save_disabled">확인</button></li>
+      </ul>
+    </div>
+    <div class="n_create_modal">
+      <h3 class="n_create_txt">생성할 폴더명을 입력주세요.</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <button>확인</button>
+    </div>
+  </div>
+  <div class="upload_modal_bg">
+    <div class="upload_modal">
+      <h3 class="upload_title">파일을 업로드하시겠습니까?</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <p class="upload_txt">중복된 파일이 존재할 경우 덮어쓰게 됩니다.</p>
+      <progress class="progress" value="0" max="100"></progress>
+      <div class="upload_file_all">
+        <!-- 중복된 파일이 없을 시 -->
+        <!-- <p class="upload_file">중복된 파일명이 없습니다.</p> -->
+        <ul class="upload_file_list">
+          <!-- 중복된 파일이 있을 시 -->
+        </ul>
+      </div>
+      <ul class="upload_modal_btn_list">
+        <li><button>취소</button></li>
+        <li><button>계속 진행</button></li>
+      </ul>
+    </div>
+  </div>
+  <div class="delete_modal_bg">
+    <div class="delete_modal">
+      <h3 class="delete_txt">선택한 파일을 <br> 정말 삭제하시겠습니까?</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <ul class="modal_btn_list">
+        <li><button>취소</button></li>
+        <li><button>삭제</button></li>
+      </ul>
+    </div>
+    <div class="n_delete_modal">
+      <h3 class="n_delete_txt">최상위 폴더는 삭제할 수 없습니다.</h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <button>확인</button>
+    </div>
+  </div>
+  <div class="download_modal_bg">
+    <div class="download_modal">
+      <h3 class="download_title">선택한 파일을 <br> 다운로드하시겠습니까? </h3>
+      <img src="/common/images/file/ex.svg" alt="엑스">
+      <ul class="download_file">
+      </ul>
+      <ul class="download_modal_btn_list">
+        <li><button>취소</button></li>
+        <li><button>확인</button></li>
+      </ul>
+    </div>
+  </div>
+  <!-- /modal -->
+  <!-- Header -->
+  <header class="cf">
+    <div class="w1300">
+      <h1>
+        <a href="/workflow_list"><img src="/common/images/logo.svg" alt="로고"></a>
+      </h1>
+      <nav class="navbar">
+        <ul class="gnb">
+          <li><a href="/file">파일관리</a></li>
+          <li><a href="/workflow_list">워크플로우</a></li>
+          <li><a href="/dblist">DB조회</a></li>
+        </ul>
+        <div class="lnb">
+          <div class="lnb_user">
+            <img src="/common/images/user.svg" alt="사용자이미지">
+            <p sec:authentication="name"></p>
+          </div>
+          <ul>
+            <li sec:authorize="hasRole('관리자')"><a href="/admin">관리자페이지</a></li>
+
+            <li><a href="/mypage">마이페이지</a></li>
+            <li><a href="/logout">로그아웃</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <!-- /Header -->
+  <!-- Main -->
+  <div class="main_all w1300 cf">
+    <h2>파일관리</h2>
+    <!-- Main_left -->
+    <div class="main_left">
+      <button class="add">
+        <img src="../common/images/file/add.svg" alt="새폴더만들기">
+        폴더 만들기
+      </button>
+      <button class="change">
+        <img src="../common/images/file/name_change.svg" alt="폴더이름바꾸기">
+        이름 바꾸기
+      </button>
+      <button class="delete">
+        <img src="../common/images/file/polder_del.svg" alt="선택폴더삭제">
+        폴더 삭제
+      </button>
+      <input type="text" placeholder="현재경로" readonly>
+      <div class="tree_all">
+        <ul class="tree">
+          <li class="/">
+            <input type="checkbox" id="/" checked>
+            <span class="backgroundColor_c0dbff"><label for="/" style="padding-left: 16px;"></label><img src="/common/images/file/file.svg" alt="파일"><p>/</p></span>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+    <!-- /Main_left -->
+    <!-- /Main_right -->
+    <div class="main_right cf">
+      <table id="table_id">
+        <caption>
+        </caption>
+        <thead>
+        <tr>
+          <th><input type="checkbox" name="checkAll"></th>
+          <th>파일명</th>
+          <th>수정일자</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+        <tr><td></td></tr>
+        </tfoot>
+      </table>
+<!--      <div class="drag_txt"></div>-->
+      <!-- <p class="gif"><img src="/common/images/loading.gif" alt="로딩"></p> -->
+    </div>
+    <!-- /Main_right -->
+  </div>
+  <!-- /Main -->
+  <!-- Footer -->
+  <footer>
+    <p>Copyright &copy; ankus 2022 .ONYCOM</p>
+  </footer>
+</div>
+<!-- /Footer -->
+<!-- 프로젝트 페이지 SCRIPT -->
+<script src="/common/js/jquery.dataTables.js"></script>
+
+</body>
+
+</html>

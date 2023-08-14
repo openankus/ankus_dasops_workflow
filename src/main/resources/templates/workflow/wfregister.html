@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ankus_workflow_register</title>
+
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Favicon PC / Mobile-->
+    <!-- <link rel="shorcut icon" href="/common/images/fav_32.jpg"> -->
+    <link rel="shorcut icon" href="/common/images/favicon/fav_180.png">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/common/css/reset.css">
+    <link rel="stylesheet" href="/common/css/font.css">
+    <link rel="stylesheet" href="/common/css/jquery.dataTables.css">
+
+    <!-- 프로젝트 페이지 CSS -->
+    <link rel="stylesheet" href="/workflow/css/wfregister.css">
+    <link rel="stylesheet" href="/common/css/header.css">
+
+    <!-- 프로젝트 페이지 SCRIPT -->
+
+
+    <!-- HTML5 JS File -->
+    <script src="/common/js/html5shiv.js"></script>
+    <script src="/common/js/respond.src.js"></script>
+    <!-- JQ PlugIn -->
+    <script src="/common/js/jquery-3.4.1.min.js"></script>
+    <!-- PreFix Free -->
+    <script src="/common/js/prefixfree.min.js"></script>
+
+    <script src="/workflow/js/cronCheck.js"></script>
+    <script src="/workflow/js/workflowregister.js"></script>
+    <script src="/common/js/header.js"></script>
+
+    <script type="text/javascript" th:inline="javascript">
+        let workflowId = [[${id}]]
+        let url = [[${url}]]
+    </script>
+</head>
+
+<body>
+<div id="wrap">
+    <div class="upload_modal_bg">
+        <div class="upload_modal">
+            <h3 class="upload_title">파일을 업로드하시겠습니까?</h3>
+            <img src="/common/images/file/ex.svg" alt="엑스">
+            <p class="upload_txt">중복된 파일이 존재할 경우 덮어쓰게 됩니다.</p>
+            <progress class="progress" value="0" max="100"></progress>
+            <div class="upload_file_all">
+                <!-- 중복된 파일이 없을 시 -->
+                <!-- <p class="upload_file">중복된 파일명이 없습니다.</p> -->
+                <ul class="upload_file_list">
+                    <!-- 중복된 파일이 있을 시 -->
+                </ul>
+            </div>
+            <ul class="upload_modal_btn_list">
+                <li><button>취소</button></li>
+                <li><button>계속 진행</button></li>
+            </ul>
+        </div>
+    </div>
+    <div class="module_load_modal_bg">
+        <div class="module_load_modal cf">
+            <h3 class="module_file_search">파일검색</h3>
+            <p class="module_file_btn"><img src="/common/images/workflow/ex.svg" alt="엑스"></p>
+            <div class="module_modal_left">
+                <h3 class="tree_title">[ 시스템 폴더 구조 ]</h3>
+                <div class="tree_all" title="/">
+                    <ul class="tree">
+                        <li class="/">
+                            <input type="checkbox" id="/" checked>
+                            <span class="backgroundColor_c0dbff"><label for="/" style="padding-left: 16px;"></label><img
+                                    src="/common/images/file/file.svg" alt="파일">/</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="module_modal_right">
+                <ul class="icon">
+                    <li class="file_change"><img src="/common/images/workflow/file_change.svg" alt="파일이름바꾸기"><span>파일 이름 바꾸기</span></li>
+                    <li><img src="/common/images/workflow/upload.svg" alt="파일업로드"><span>파일 업로드</span></li>
+                </ul>
+                <table id="table_id">
+                    <thead>
+                    <tr>
+                        <!-- <th><input type="checkbox"></th> -->
+                        <th>파일명</th>
+                        <th>수정일자</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td></td>
+                    </tr>
+                    </tfoot>
+                </table>
+                <button class="module_right_c_btn">취소</button>
+                <button class="module_right_btn">확인</button>
+            </div>
+        </div>
+    </div>
+    <div class="factor_modal_bg">
+        <div class="factor_modal">
+            <h3 class="factor_title">인수 값 입력</h3>
+            <img src="/common/images/workflow/ex.svg" alt="엑스">
+            <input type="text">
+            <ul class="factor_btn_list">
+                <li>
+                    <button>취소</button>
+                </li>
+                <li>
+                    <button>확인</button>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+    <div class="module_warning_bg">
+        <div class="module_warning_modal">
+            <h3 class="module_warning_txt">실행설정 이름이 입력되지 않았습니다.</h3>
+            <img src="/common/images/file/ex.svg" alt="엑스">
+            <button>확인</button>
+        </div>
+    </div>
+    <div class="modify_warning_bg" title="">
+        <div class="modify_warning_modal">
+            <h3 class="modify_warning_txt">작성 중인 실행설정을 저장하시겠습니까?</h3>
+            <img src="/common/images/file/ex.svg" alt="엑스">
+            <ul class="modify_warning_btn">
+                <li>
+                    <button>취소</button>
+                </li>
+                <li>
+                    <button>확인</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="complete_modal_bg">
+        <div class="complete_modal">
+            <h3 class="complete_txt">???가 완료되었습니다.</h3>
+            <img src="/common/images/file/ex.svg" alt="엑스">
+            <button>확인</button>
+        </div>
+    </div>
+    <!-- Header -->
+    <header class="cf">
+        <div class="w1300">
+            <h1>
+                <a href="/workflow_list"><img src="/common/images/logo.svg" alt="로고"></a>
+            </h1>
+            <nav class="navbar">
+                <ul class="gnb">
+                    <li><a href="/file">파일관리</a></li>
+                    <li><a href="/workflow_list">워크플로우</a></li>
+                    <li><a href="/dblist">DB조회</a></li>
+                </ul>
+                <div class="lnb">
+                    <div class="lnb_user">
+                        <img src="/common/images/user.svg" alt="사용자이미지">
+                        <p sec:authentication="name"></p>
+                    </div>
+                    <ul>
+                        <li sec:authorize="hasRole('관리자')"><a href="/admin">관리자페이지</a></li>
+                        <li><a href="/mypage">마이페이지</a></li>
+                        <li><a href="/logout">로그아웃</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <!-- /Header -->
+    <!-- Main -->
+    <div class="main_all w1300">
+        <h2>워크플로우 등록</h2>
+        <div class="workflow cf">
+            <div class="workflow_left cf">
+                <input class="workflow_name" type="text" placeholder="워크플로우명">
+                <div class="activate_select">
+                    <h3>워크플로우 활성화 여부</h3>
+                    <ul class="activate_list">
+                        <li>
+                            <label>
+                                <input type="radio" name="active" value="activate">활성화
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="radio" name="active" value="no_activate" checked>비활성화
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+                <div class="excution_condition">
+                    <h3>실행조건</h3>
+                    <div class="select">
+                        <div class="selected">
+                            <div class="selected-value">요일 및 시각</div>
+                            <div class="arrow"></div>
+                        </div>
+                        <ul>
+                            <li class="option">요일 및 시각</li>
+                            <li class="option">cron 형식</li>
+                            <li class="option">이벤트 청취</li>
+                        </ul>
+                    </div>
+                    <div class="cron_inp">
+                        <input type="text" placeholder="0 */5 * * * *">
+                        <div class="cron_inp_hint">
+                            <div class="hint_info">
+                                <p class="hint_info_title">[ cron 형식 설명 ]</p>
+                                <p class="hint_txt">구성 : 초,&nbsp; 분,&nbsp; 시,&nbsp; 일,&nbsp; 월,&nbsp; 요일,&nbsp; 연도</p>
+                                <p class="hint_txt"><span>*</span> : 필수 입력 사항</p>
+                            </div>
+                            <div class="hint_table">
+                                <ul>
+                                    <li class="hint_title">이름</li>
+                                    <li><span class="mandatory">*</span>초</li>
+                                    <li><span class="mandatory">*</span>분</li>
+                                    <li><span class="mandatory">*</span>시</li>
+                                    <li><span class="mandatory">*</span>일</li>
+                                    <li><span class="mandatory">*</span>월</li>
+                                    <li><span class="mandatory">*</span>요일</li>
+                                    <li><span class="mandatory"></span>연도</li>
+                                </ul>
+                                <ul>
+                                    <li class="hint_title">범위</li>
+                                    <li>0 - 59</li>
+                                    <li>0 - 59</li>
+                                    <li>0 - 23</li>
+                                    <li>1 - 31</li>
+                                    <li>1 - 12</li>
+                                    <li>1 - 7 or SUN - SAT</li>
+                                    <li>1970 - 2099</li>
+                                </ul>
+                                <ul>
+                                    <li class="hint_title">사용 가능 기호</li>
+                                    <li>, - /</li>
+                                    <li>, - * /</li>
+                                    <li>, - * /</li>
+                                    <li>, - * ? /</li>
+                                    <li>, - * /</li>
+                                    <li>, - * ? /</li>
+                                    <li>, - * /</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status_inp">
+                        <input type="text" placeholder="청취 이벤트명. 예시) 성능미흡">
+                    </div>
+                    <ul class="condition_list">
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>월</p>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>화</p>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>수</p>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>목</p>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>금</p>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>토</p>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox">
+                                <p>일</p>
+                            </label>
+                        </li>
+                    </ul>
+                    <div class="time_all">
+                        <input type="time" name="inp_time" data-placeholder="시간 : 분" required aria-required="true">
+                    </div>
+                </div>
+                <div class="module">
+                    <h3>실행 파일 실행 설정</h3>
+                    <div class="module_name"><input type="text" placeholder="실행설정 이름"></div>
+                    <ul class="module_load">
+                        <li><input type="text" placeholder="실행 파일 경로"></li>
+                        <li>
+                            <button>입력</button>
+                        </li>
+                        <li><img src="../common/images/workflow/search.svg" alt="검색아이콘"></li>
+                    </ul>
+                    <div class="number">
+                        <p class="number_box"></p>
+                        <ul class="number_btn_list">
+                            <li>인수 추가</li>
+                            <li>인수 수정</li>
+                            <li>인수 삭제</li>
+                        </ul>
+                    </div>
+                    <ul class="module_btn">
+                        <li>설정 추가</li>
+                        <li>설정 수정</li>
+                        <li>스텝 추가</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="workflow_right">
+                <h3>워크플로우</h3>
+                <div class="workflow_view"></div>
+
+                <input type="checkbox" id="menuicon">
+                <!-- 햄버거 메뉴 -->
+                <label for="menuicon" class="ham_menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+                <!-- /햄버거 메뉴 -->
+                <!-- 햄버거 클릭 시 나오는 내용 -->
+                <div class="play_search_all">
+                    <h3 class="play_search_title">실행파일 실행설정 목록</h3>
+                    <div class="play_search_cont_wrap">
+                    </div>
+                </div>
+                <!-- /햄버거 클릭 시 나오는 내용 -->
+            </div>
+        </div>
+        <div class="button_list">
+            <button class="cancel">취소</button>
+            <button class="save">저장</button>
+        </div>
+    </div>
+    <!-- /Main -->
+    <!-- Footer -->
+    <footer>
+        <p>Copyright &copy; ankus 2022 .ONYCOM</p>
+    </footer>
+    <!-- /Footer -->
+</div>
+<!-- 프로젝트 페이지 SCRIPT -->
+<script src="/common/js/jquery-ui.min.js"></script>
+<script src="/common/js/jquery.dataTables.js"></script>
+</body>
+
+</html>

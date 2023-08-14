@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ankus_workflow_list</title>
+  
+  <!-- Bootstrap CDN -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Favicon PC / Mobile-->
+  <!-- <link rel="shorcut icon" href="/common/images/fav_32.jpg"> -->
+  <link rel="shorcut icon" href="/common/images/favicon/fav_180.png">
+  <!-- CSS -->
+  <link rel="stylesheet" href="/common/css/reset.css">
+  <link rel="stylesheet" href="/common/css/font.css">
+  <link rel="stylesheet" href="/common/css/jquery.dataTables.css">
+
+  <!-- 프로젝트 페이지 CSS -->
+  <link rel="stylesheet" href="/workflow/css/wflist.css">
+  <link rel="stylesheet" href="/common/css/header.css">
+  
+  <!-- 프로젝트 페이지 SCRIPT -->
+
+  <!-- HTML5 JS File -->
+  <script src="/common/js/html5shiv.js"></script>
+  <script src="/common/js/respond.src.js"></script>
+  <!-- JQ PlugIn -->
+  <script src="/common/js/jquery-3.4.1.min.js"></script>
+  <!-- PreFix Free -->
+  <script src="/common/js/prefixfree.min.js"></script>
+
+  <script src="/common/js/jquery.dataTables.js"></script>
+  <script src="/workflow/js/workflowlist.js"></script>
+  <script src="/common/js/header.js"></script>
+
+</head>
+<body>
+  <div id="wrap">
+    <!-- Modal -->
+    <div class="delete_modal_bg">
+      <div class="delete_modal">
+        <h3 class="delete_txt">선택한 워크플로우를 <br> 정말 삭제하시겠습니까?</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <ul class="modal_btn_list">
+          <li><button>취소</button></li>
+          <li><button>삭제</button></li>
+        </ul>
+      </div>
+      <div class="n_delete_modal">
+        <h3 class="n_delete_txt">삭제할 워크플로우가 선택되지 않았습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <div class="complete_modal_bg">
+      <div class="complete_modal">
+        <h3 class="complete_txt">???가 완료되었습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <div class="n_action_modal_bg">
+      <div class="n_action_modal">
+        <h3 class="n_action_txt">워크플로우 활성화 시 즉시 동작 기능을 사용할 수 없습니다.</h3>
+        <img src="../common/images/workflow/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <!-- /Modal -->
+    <!-- Header -->
+    <header class="cf">
+      <div class="w1300">
+        <h1>
+          <a href="/workflow_list"><img src="/common/images/logo.svg" alt="로고"></a>
+        </h1>
+        <nav class="navbar">
+          <ul class="gnb">
+            <li><a href="/file">파일관리</a></li>
+            <li><a href="/workflow_list">워크플로우</a></li>
+            <li><a href="/dblist">DB조회</a></li>
+          </ul>
+          <div class="lnb">
+            <div class="lnb_user">
+              <img src="/common/images/user.svg" alt="사용자이미지">
+              <p sec:authentication="name" ></p>
+            </div>
+            <ul>
+              <li sec:authorize="hasRole('관리자')"><a href="/admin">관리자페이지</a></li>
+              <li><a href="/mypage">마이페이지</a></li>
+              <li><a href="/logout">로그아웃</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- /Header -->
+      <!-- Main -->
+      <div class="main_all w1300 cf">
+        <h2>워크플로우 목록</h2>
+        <div class="search_all">
+          <div class="select">
+            <div class="selected">
+              <div class="selected-value">이름</div>
+              <div class="arrow"></div>
+            </div>
+            <ul>
+              <li class="option">이름</li>
+              <li class="option">등록자</li>
+            </ul>
+          </div>
+          <ul class="keyword">
+            <li><input type="text" placeholder="검색어"></li>
+          </ul>
+          <div class="date_all">
+            <input type="date" name="inp_date" data-placeholder="날짜 선택" required aria-required="true">
+            <p class="short_line"></p>
+            <input type="date" name="inp_date" data-placeholder="날짜 선택" required aria-required="true">
+          </div>
+          <button class="search">조회</button>
+        </div>
+        <p class="line"></p>
+        <div class="button_list">
+          <a href="workflow"><button class="add">등록</button></a>
+          <button class="del">삭제</button>
+        </div>
+        <table id="table_id">
+          <thead>
+            <tr>
+              <th><input type="checkbox" name="checkAll"></th>
+              <th>이름</th>
+              <th>실행조건</th>
+              <th>활성화</th>
+              <th>즉시동작</th>
+              <th>등록자</th>
+              <th>수정일자</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <!-- /Main -->
+    <!-- Footer -->
+    <footer>
+      <p>Copyright &copy; ankus 2022 .ONYCOM</p>
+    </footer>
+    <!-- /Footer -->
+  </div>
+
+</body>
+</html>

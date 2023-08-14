@@ -1,0 +1,3 @@
+[submodule "ankus_dasops_common"]
+	path = ankus_dasops_common
+	url = https://github.com/bigdata-ankus/ankus_dasops_common.git
