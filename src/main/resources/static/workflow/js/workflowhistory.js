@@ -292,7 +292,8 @@ function log_load(path,ch){
                 document.querySelector(".console_box").value = data['content'].replaceAll("\n", '\r\n')
                 if (ch === 0) window.scrollTo(0, document.body.scrollHeight);
             }else{
-                console.log('error')
+                // console.log('error')
+                document.querySelector(".console_box").innerHTML = "파일이 없습니다.";
 
             }
         },
