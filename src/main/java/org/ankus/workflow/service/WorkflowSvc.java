@@ -13,14 +13,9 @@ import org.ankus.workflow.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.time.DayOfWeek;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -92,6 +87,10 @@ public class WorkflowSvc {
      */
     @Autowired
     ModuleExecHistRepository moduleExecHistRepository;
+
+
+    @Autowired
+    WorkflowExecHistRepositorySupport workflowExecHistRepositorySupport;
 
 
     public WorkflowSvc(){
@@ -301,7 +300,6 @@ public class WorkflowSvc {
         }catch (IOException e){
             log.warn("모듈실행의 콘솔출력 결과파일을 로드 중 에러",e);
         }
-        System.out.println(sb.toString());
         Map<String,String> map = new HashMap<>();
         map.put("result","success");
         map.put("content",sb.toString());
@@ -309,10 +307,17 @@ public class WorkflowSvc {
     }
 
 
+    /**
+     * 워크플로우 실행 요청
+     * 
+     * @param id    workflow ID
+     * @param cause 실행 원인
+     * @return  실행되는 워크플로우 이름
+     */
     public String workflowRun(Long id, WorkflowExecCause cause) {
         workflowExecManager.requestWorkflowRun(id, cause);
         Workflow workflow = workflowRepository.getById(id);
-        return workflow.getName()+" ";
+        return workflow.getName();
     }
 
 
@@ -368,6 +373,94 @@ public class WorkflowSvc {
         return  retList;
     }
 
+    /**
+     * 실행 중인 workflow ID 집합을 반환
+     *
+     * @return workflow ID 집합
+     */
+    public Set<Long> getAllRunningWorkflowIdSet(){
+        return workflowExecManager.getRunningWorkflowIdSet();
+    }
 
+
+    /**
+     * 워크플로우 목록을 반환
+     *
+     * @param subName 워크플로우 이름 검색어
+     * @return
+     */
+    public List<Workflow> listWorkflows(String subName){
+        return workflowRepository.findWorkflowsByNameContaining(subName);
+    }
+
+    /**
+     * 워크플로우의 실행여부를 반환
+     *
+     * @param workflowId 확인할 워크플로우의 ID
+     * @return 워크플로우의 실행여부
+     */
+    public boolean isRunningWorkflow(Long workflowId){
+        return workflowExecManager.getRunningWorkflowIdSet().contains(workflowId);
+    }
+
+    /**
+     * 워크플로우의 최근 실행이력들을 반환
+     *
+     * @param workflowId 워크플로우 ID
+     * @param limit 워프플로우 이력 개수
+     * @return
+     */
+    public List<WorkflowExecHist> getRecentWorkflowExecHistList(Long workflowId, Long limit){
+
+        // 수정할 것!!!!!
+        List<WorkflowExecHist> workflowExecHistList = workflowExecHistRepositorySupport.getRecentWorkflowExecHistList(workflowId, limit);
+
+        return  workflowExecHistList;
+    }
+
+
+    public String getConOutText(Long moduleExecHistId, Integer lineCount) throws FileNotFoundException, IOException{
+        ModuleExecHist moduleExecHist = moduleExecHistRepository.getById(moduleExecHistId);
+
+        // 1. RandomAcessFile, 마지막 라인을 담을 String, 읽을 라인 수
+        RandomAccessFile randomAccessFile = new RandomAccessFile(moduleExecHist.getConOutFilePath(), "r");
+        StringBuffer lastLine = new StringBuffer();
+
+        // 2. 전체 파일 길이
+        long fileLength = randomAccessFile.length();
+
+        // 3. 포인터를 이용하여 뒤에서부터 앞으로 데이터를 읽는다.
+        for (long pointer = fileLength - 1; pointer >= 0; pointer--) {
+
+            // 3.1. pointer를 읽을 글자 앞으로 옮긴다.
+            randomAccessFile.seek(pointer);
+
+            // 3.2. pointer 위치의 글자를 읽는다.
+            char c = (char) randomAccessFile.read();
+
+            // 3.3. 줄바꿈이 3번(lineCount) 나타나면 더 이상 글자를 읽지 않는다.
+            if (c == '\n') {
+                lineCount--;
+                if (lineCount == 0) {
+                    break;
+                }
+            }
+
+            // 3.4. 결과 문자열의 앞에 읽어온 글자(c)를 붙여준다.
+            lastLine.insert(0, c);
+        }
+
+
+        // 4. OS에 따른 문자열 인코딩 적용
+        String os = System.getProperty("os.name").toLowerCase();
+        String conOutText = null;
+        if (os.contains("win")) {
+            conOutText = new String(lastLine.toString().getBytes("ISO-8859-1"), "UTF-8");
+        }else{
+            conOutText = lastLine.toString();
+        }
+
+        return conOutText;
+    }
 
 }

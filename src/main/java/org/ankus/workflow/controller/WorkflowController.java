@@ -153,7 +153,7 @@ public class WorkflowController {
     @PostMapping(value="workflow_run")
     @ResponseBody
     public String workflowRun(@RequestParam Long id){
-        return workflowSvc.workflowRun(id, WorkflowExecCause.ON_DEMAND)+"동작";
+        return workflowSvc.workflowRun(id, WorkflowExecCause.ON_DEMAND)+" 동작";
     }
 
     // 특정 워크플로우 즉시동작 STOP

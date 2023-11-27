@@ -76,7 +76,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/join/**", "/login/**", "/common/**", "/share-code/**", "/eventListener/**").permitAll() // 설정한 리소스의 접근을 인증절차 없이 허용
+                .antMatchers("/", "/join/**", "/login/**", "/common/**", "/share-code/**", "/api/**").permitAll() // 설정한 리소스의 접근을 인증절차 없이 허용
                 .antMatchers("/admin/*","/admin").hasRole("관리자") // '관리자' 역할을 가지고 있어야 접근 허용
                 .anyRequest().authenticated() // 그 외 모든 리소스를 의미하며 인증 필요
                 .and()

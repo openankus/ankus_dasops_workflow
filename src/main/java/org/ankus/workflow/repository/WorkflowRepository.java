@@ -30,4 +30,11 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
 
     Workflow findById(long id);
 
+    /**
+     * 일부 이름을 포함하는 워크플로우명의  워크플로우 목록을 반환
+     * @param subName 일부 이름
+     * @return 워크플로우 목록
+     */
+    List<Workflow> findWorkflowsByNameContaining(String subName);
+
 }

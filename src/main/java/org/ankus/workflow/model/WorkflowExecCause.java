@@ -17,5 +17,10 @@ public enum WorkflowExecCause {
     /**
      * 이벤트 청취
      */
-    EVENT_LISTEN
+    EVENT_LISTEN,
+
+    /**
+     * API 요청
+     */
+    API_REQUEST
 }

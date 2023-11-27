@@ -15,15 +15,18 @@ let mouseClick = 'file'         // 마우스 클릭한 위치
 let table_id    // 데이터 테이블
 
 $(function(){
-    window.addEventListener('beforeunload', (event) => {
-        // 명세에 따라 preventDefault는 호출해야하며, 기본 동작을 방지합니다.
-        event.preventDefault();
-
-        // 대표적으로 Chrome에서는 returnValue 설정이 필요합니다.
-        if(page_close && !workflow_check()) {
-            event.returnValue = '';
-        }
-    });
+    // 2023-11-27 주석처리 by 김정호
+    // (사유: 편집 변화에 상관없이 경고 메시지가 발생)
+    //
+    // window.addEventListener('beforeunload', (event) => {
+    //     // 명세에 따라 preventDefault는 호출해야하며, 기본 동작을 방지합니다.
+    //     event.preventDefault();
+    //
+    //     // 대표적으로 Chrome에서는 returnValue 설정이 필요합니다.
+    //     if(page_close && !workflow_check()) {
+    //         event.returnValue = '';
+    //     }
+    // });
 
     // cron 입력 이벤트
     document.querySelector(".cron_inp input").addEventListener("input",function (){
