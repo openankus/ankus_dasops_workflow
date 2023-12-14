@@ -1,4 +1,4 @@
-# ankus DASOps Workflow Manager
+# ankus DASOps JupyterLab Extension
 
 ########################################################################### <br>
 This is readme.md file <br>
