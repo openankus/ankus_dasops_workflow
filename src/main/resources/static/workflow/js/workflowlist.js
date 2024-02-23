@@ -25,14 +25,12 @@ $(function (){
 
                         for (let i = 0; i < arr.length; i++) {
                             let el = arr[i]
-                            for(let c = 0; c < data.length; c++) {
-                                if (parseInt(el.title) === data[c]) {
-                                    el.src = '/common/images/workflow/stop.svg'
-                                    el.alt = 'stop'
-                                } else if (c === data.length - 1) {
-                                    el.src = '/common/images/workflow/play.svg'
-                                    el.alt = 'play'
-                                }
+                            if (data.includes(parseInt(el.title))){
+                                el.src = '/common/images/workflow/stop.svg'
+                                el.alt = 'stop'
+                            }else{
+                                el.src = '/common/images/workflow/play.svg'
+                                el.alt = 'play'
                             }
                         }
                     }
