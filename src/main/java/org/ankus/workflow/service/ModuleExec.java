@@ -123,6 +123,11 @@ public class ModuleExec {
             // Python 모듈 실행 명령
             if (os.contains("win")){
                 // 윈도우에서 실행 설정
+
+                //  mini-conda 실행환경 설정
+                cmdLineList.add(pythonUtil.getWindowsCondaActivateCmd());
+                cmdLineList.add("&&");
+
                 cmdLineList.add("python");
             }else{
                 // 리눅스에서 실행 설정
@@ -135,6 +140,14 @@ public class ModuleExec {
             cmdLineList.addAll(this.moduleExecConf.getCmdArgList());
         }else if (this.moduleExecConf.getModuleFilePath().endsWith(".ipynb")){
             //  Jupyter Notebook 파일의 경우
+
+            // Python 모듈 실행 명령
+            if (os.contains("win")) {
+                // 윈도우에서 실행 설정
+                //  mini-conda 실행환경 설정
+                cmdLineList.add(pythonUtil.getWindowsCondaActivateCmd());
+                cmdLineList.add("&&");
+            }
 
             // jupyter notebook 모듈 실행 명령
             cmdLineList.add("jupyter");
@@ -180,6 +193,7 @@ public class ModuleExec {
         moduleExecHist.setExecStat(ExecStat.RUNNING);
         moduleExecHist.setCmdLine(cmdLine.toString());
 
+
         try{
             //  콘솔 출력결과 파일 경로 설정
             String conOutFileName =
@@ -207,11 +221,14 @@ public class ModuleExec {
         //---</모듈 실행이력 등록>---
 
 
+        log.debug("실행 명령어\n"+cmdLine.toString());
+
+
 
         //  명령어 줄 실행
         try{
 
-            //  콘솔 출력결과를 담는 ㅋㅋㅋㅋㅋㅋㅋㅋ
+            //  콘솔 출력결과를 담는 Watchdog 설정
 
             //  비동기 명령어 실행을 감시할 객체 설정
             ExecuteWatchdog watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
@@ -250,7 +267,8 @@ public class ModuleExec {
                         //  일반적인 모듈 실행 실패한 경우,
                         moduleExecHist.setErrMsg(e.getMessage());
 
-                        log.warn("모듈실행 실패 (워크플로우 이름: "+workflowName+") (모듈실행 설정 이름: "+ moduleExecConf.getName()+")");
+                        log.error("모듈실행 실패 (워크플로우 이름: "+workflowName+") (모듈실행 설정 이름: "+ moduleExecConf.getName()+")\n(실행명령어: "+moduleExecHist.getCmdLine()+")", e);
+
                     }
                     moduleExecHist.setEndDateTime(LocalDateTime.now());
                     moduleExecHistRepository.save(moduleExecHist);
@@ -269,7 +287,7 @@ public class ModuleExec {
             moduleExecHistRepository.save(moduleExecHist);
             execStat = moduleExecHist.getExecStat();
 
-            log.warn("워크플로우의 모듈실행 중 에러", e);
+            log.error("워크플로우의 모듈실행 중 에러", e);
         }
 
     }

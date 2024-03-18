@@ -33,8 +33,11 @@ public class PythonUtil {
     @Value("${ankus.jupyter.port}")
     Long juptyerlabPort = null;
 
-
-
+    /**
+     * 윈도우 실행환경에서 conda 활성화를 위한 명령어
+     */
+    @Value("${ankus.windows.conda.activate_cmd}")
+    String windowsCondaActivateCmd;
 
 
     /**
@@ -105,6 +108,10 @@ public class PythonUtil {
     public String getAnkusJupyterWorkspace(){
         return this.ankusJupyterWorkspace;
     }
+
+
+
+    public String getWindowsCondaActivateCmd(){return this.windowsCondaActivateCmd;}
 
 
 }
