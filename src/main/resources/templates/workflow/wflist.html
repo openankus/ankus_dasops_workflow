@@ -38,6 +38,21 @@
 <body>
   <div id="wrap">
     <!-- Modal -->
+    <div class="copy_modal_bg">
+      <div class="copy_modal">
+        <h3 class="copy_txt">선택한 워크플로우를 <br> 정말 복사하시겠습니까?</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <ul class="modal_btn_list">
+          <li><button>취소</button></li>
+          <li><button>복사</button></li>
+        </ul>
+      </div>
+      <div class="n_copy_modal">
+        <h3 class="n_copy_txt">복사할 워크플로우가 선택되지 않았습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
     <div class="delete_modal_bg">
       <div class="delete_modal">
         <h3 class="delete_txt">선택한 워크플로우를 <br> 정말 삭제하시겠습니까?</h3>
@@ -122,6 +137,9 @@
         <p class="line"></p>
         <div class="button_list">
           <a href="workflow"><button class="add">등록</button></a>
+          <button class="copy">복사</button>
+<!--          <button class="export">내보내기</button>-->
+<!--          <button class="import">가져오기</button>-->
           <button class="del">삭제</button>
         </div>
         <table id="table_id">

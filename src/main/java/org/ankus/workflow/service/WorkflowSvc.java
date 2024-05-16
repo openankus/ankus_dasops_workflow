@@ -16,7 +16,10 @@ import org.springframework.util.MultiValueMap;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.io.*;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -258,14 +261,65 @@ public class WorkflowSvc {
         return workflowRepository.save(workflow).getActFlag();
     }
 
+    public void workflowCopy(List<Long> ids, String copyUser){
+
+        for (Long id : ids){
+            // 복사할 워크플로우 정보 로드
+            Workflow workflow = workflowRepository.getById(id);
+
+
+            // 복사 워크플로우 생성
+            Workflow copyWorkflow = new Workflow();
+            copyWorkflow.setName(
+                    workflow.getName()+" - 복사본"+DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now()));
+            copyWorkflow.setActFlag(Flag.N);
+            copyWorkflow.setExecCondType(workflow.getExecCondType());
+            List<DayOfWeek> copyDayList = new ArrayList<DayOfWeek>();
+            for (DayOfWeek dow : workflow.getExecCondDayList()){
+                copyDayList.add(dow);
+            }
+            copyWorkflow.setExecCondDayList(copyDayList);
+            copyWorkflow.setExecCondHour(workflow.getExecCondHour());
+            copyWorkflow.setExecCondMin(workflow.getExecCondMin());
+            copyWorkflow.setExecCondCronExp(workflow.getExecCondCronExp());
+            copyWorkflow.setExecCondEventName(workflow.getExecCondEventName());
+            copyWorkflow.setCreateUser(workflow.getCreateUser());
+            // 복사 워크플로우 단계 생성
+            List<WorkflowStep> copyWorkflowStepList = new ArrayList<WorkflowStep>();
+            for (WorkflowStep workflowStep : workflow.getWorkflowStepList()) {
+                WorkflowStep copyWorkflowStep = new WorkflowStep();
+                copyWorkflowStep.setNum(workflowStep.getNum());
+                // 복사 모듈 실행설정 생성
+                List<ModuleExecConf> moduleExecConfList = new ArrayList<ModuleExecConf>();
+                for (ModuleExecConf moduleExecConf : workflowStep.getModuleExecConfList()){
+                    ModuleExecConf copyModuleExecConf = new ModuleExecConf();
+                    copyModuleExecConf.setNum(moduleExecConf.getNum());
+                    copyModuleExecConf.setName(moduleExecConf.getName());
+                    copyModuleExecConf.setModuleFilePath(moduleExecConf.getModuleFilePath());
+                    List<String> cmdArgList = new ArrayList<String>();
+                    for (String cmdArg : moduleExecConf.getCmdArgList()){
+                        cmdArgList.add(cmdArg);
+                    }
+                    copyModuleExecConf.setCmdArgList(cmdArgList);
+                    moduleExecConfList.add(copyModuleExecConf);
+                }
+                copyWorkflowStep.setModuleExecConfList(moduleExecConfList);
+                copyWorkflowStepList.add(copyWorkflowStep);
+            }
+            copyWorkflow.setWorkflowStepList(copyWorkflowStepList);
+
+            //  복사한 워크플로우 저장
+            workflowRepository.save(copyWorkflow);
+        }
+    }
+
     /**
      * 워크플로우 삭제
      * @param{List<Long>} id
      */
-    public void workflowDelete(List<Long> id){
-        for(int i=0;i<id.size();i++){
-            System.out.println(id.get(i));
-            workflowRepository.deleteById(id.get(i));
+    public void workflowDelete(List<Long> ids){
+        for(int i=0;i<ids.size();i++){
+            workflowRepository.deleteById(ids.get(i));
         }
     }
 

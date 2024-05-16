@@ -44,8 +44,4 @@ public class ModuleExecConf implements Serializable {
     @CollectionTable(name = "cmd_arg", joinColumns = @JoinColumn(name = "module_exec_conf_id"))
     @Column(name = "arg")
     List<String> cmdArgList = new ArrayList<String>();
-
-
-
-
 }

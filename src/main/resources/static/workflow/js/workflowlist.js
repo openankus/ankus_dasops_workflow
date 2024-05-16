@@ -270,6 +270,70 @@ window.onload=function(){
         }
     })
 
+
+
+    // 복사
+    document.querySelector(".copy").addEventListener("click", function(e){
+        document.getElementsByClassName('copy_modal_bg')[0].style.display='inline'
+        let check = document.getElementsByName('check')
+        let ids = []
+        for (let i = 0; i < check.length; i++) {
+            if (check[i].checked) ids.push(parseInt(check[i].value))
+        }
+        if(ids.length === 0) {
+            document.getElementsByClassName('n_copy_modal')[0].style.display = 'inline'
+        }
+    })
+    // 선택한 복사 모달창 x 버튼
+    document.querySelector('.copy_modal_bg img').addEventListener('click',function(){
+        document.getElementsByClassName('copy_modal_bg')[0].style.display='none'
+    })
+    // 선택한 복사 모달창 취소 버튼
+    document.querySelectorAll('.copy_modal_bg button')[0].addEventListener('click',function(){
+        document.getElementsByClassName('copy_modal_bg')[0].style.display='none'
+    })
+    // 선택한 복사 모달창 확인 버튼
+    document.querySelectorAll('.copy_modal_bg button')[1].addEventListener('click',function(){
+        let check = document.getElementsByName('check')
+        let ids = []
+        let loginIds = true
+        for (let i = 0; i < check.length; i++) {
+            if (check[i].checked) {
+                if(check[i].parentNode.parentNode.querySelectorAll("td")[5].querySelector("p").id !== document.querySelector(".lnb_user p").name) loginIds = false
+                ids.push(parseInt(check[i].value))
+            }
+        }
+
+        $.ajax({
+            url: 'workflow_copy',
+            type: "POST",
+            data: {ids: ids},
+            success: function (data) {
+                table.order(['1','asc']).draw();
+                document.getElementsByClassName('copy_modal_bg')[0].style.display='none'
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        });
+
+    })
+
+    // 선택안된 복사 모달창 확인 버튼
+    document.querySelector('.n_copy_modal button').addEventListener('click',function () {
+        document.getElementsByClassName('n_copy_modal')[0].style.display = 'none'
+        document.getElementsByClassName('copy_modal_bg')[0].style.display='none'
+    })
+    // 선택안된 복사 모달창 X 버튼
+    document.querySelector('.n_copy_modal img').addEventListener('click',function () {
+        document.getElementsByClassName('n_copy_modal')[0].style.display = 'none'
+        document.getElementsByClassName('copy_modal_bg')[0].style.display='none'
+    })
+
+
+
+
+
     // 삭제
     document.querySelector(".del").addEventListener("click", function(e){
         document.getElementsByClassName('delete_modal_bg')[0].style.display='inline'

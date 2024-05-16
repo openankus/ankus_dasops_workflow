@@ -164,12 +164,22 @@ public class WorkflowController {
     }
 
     // 특정 워크플로우 목록 삭제
+    @PostMapping(value="workflow_copy")
+    @ResponseBody
+    public void workflowCopy(@RequestParam(value="ids[]") List<Long> ids, Principal principal){
+        String copyUser = principal.getName()+"_"+userService.userInfo(principal.getName()).get(0).getName();
+        log.info("<workflow 복사(사용자:"+copyUser+" / ids: "+ ids.toString()+ ")");
+        workflowSvc.workflowCopy(ids, copyUser);
+        log.info("</workflow 복사(사용자:"+copyUser+" / ids: "+ ids.toString()+ ")");
+    }
+
+    // 특정 워크플로우 목록 삭제
     @PostMapping(value="workflow_delete")
     @ResponseBody
     public void workflowDelete(@RequestParam(value="ids[]") List<Long> ids){
-        System.out.println("workflow 삭제");
+        log.info("<workflow 삭제>(ids: "+ ids.toString()+ ")");
         workflowSvc.workflowDelete(ids);
-        System.out.println("workflow 삭제 완료");
+        log.info("</workflow 삭제>(ids: "+ ids.toString()+ ")");
     }
 
     // 특정 모듈 console 내용 확인
