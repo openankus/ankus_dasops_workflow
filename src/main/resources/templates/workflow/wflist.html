@@ -31,6 +31,7 @@
   <script src="/common/js/prefixfree.min.js"></script>
 
   <script src="/common/js/jquery.dataTables.js"></script>
+  <script src="/file/js/jquery.fileDownload.js"></script>
   <script src="/workflow/js/workflowlist.js"></script>
   <script src="/common/js/header.js"></script>
 
@@ -53,6 +54,22 @@
         <button>확인</button>
       </div>
     </div>
+    <div class="export_modal_bg">
+      <div class="export_modal">
+        <h3 class="export_txt">선택한 워크플로우를 <br> 정말 내보내기 하시겠습니까?</h3>
+        <h3 class="export_txt2"><input type="checkbox" id="with_other_file">모듈파일과 동일 디렉토리에 있는 파일 및 디렉토리들도 포함</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <ul class="modal_btn_list">
+          <li><button>취소</button></li>
+          <li><button>내보내기</button></li>
+        </ul>
+      </div>
+      <div class="n_export_modal">
+        <h3 class="n_export_txt">내보내기 할 워크플로우가 선택되지 않았습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
     <div class="delete_modal_bg">
       <div class="delete_modal">
         <h3 class="delete_txt">선택한 워크플로우를 <br> 정말 삭제하시겠습니까?</h3>
@@ -71,6 +88,20 @@
     <div class="complete_modal_bg">
       <div class="complete_modal">
         <h3 class="complete_txt">???가 완료되었습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <div class="import_complete_modal_bg">
+      <div class="import_complete_modal">
+        <h3 class="import_complete_txt">가져오기가 완료되었습니다.</h3>
+        <img src="/common/images/file/ex.svg" alt="엑스">
+        <button>확인</button>
+      </div>
+    </div>
+    <div class="import_fail_modal_bg">
+      <div class="import_fail_modal">
+        <h3 class="import_fail_txt">가져오기가 실패하였습니다.</h3>
         <img src="/common/images/file/ex.svg" alt="엑스">
         <button>확인</button>
       </div>
@@ -138,8 +169,8 @@
         <div class="button_list">
           <a href="workflow"><button class="add">등록</button></a>
           <button class="copy">복사</button>
-<!--          <button class="export">내보내기</button>-->
-<!--          <button class="import">가져오기</button>-->
+          <button class="export">내보내기</button>
+          <button class="import">가져오기</button>
           <button class="del">삭제</button>
         </div>
         <table id="table_id">

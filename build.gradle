@@ -51,6 +51,13 @@ dependencies {
 
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
+	// Zip 유틸 라이브러리
+	implementation 'org.zeroturnaround:zt-zip:1.17'
+
+	// File 유틸 라이브러리
+	implementation 'commons-io:commons-io:2.16.1'
+
+
 	implementation project(':ankus_dasops_common') // 없으면 login 화면 안보임
 }
 

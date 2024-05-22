@@ -334,6 +334,132 @@ window.onload=function(){
 
 
 
+    // 내보내기
+    document.querySelector(".export").addEventListener("click", function(e){
+        document.getElementsByClassName('export_modal_bg')[0].style.display='inline'
+        let check = document.getElementsByName('check')
+        let ids = []
+        for (let i = 0; i < check.length; i++) {
+            if (check[i].checked) ids.push(parseInt(check[i].value))
+        }
+        if(ids.length === 0) {
+            document.getElementsByClassName('n_export_modal')[0].style.display = 'inline'
+        }
+    })
+    // 선택한 내보내기 모달창 x 버튼
+    document.querySelector('.export_modal_bg img').addEventListener('click',function(){
+        document.getElementsByClassName('export_modal_bg')[0].style.display='none'
+    })
+    // 선택한 내보내기 모달창 취소 버튼
+    document.querySelectorAll('.export_modal_bg button')[0].addEventListener('click',function(){
+        document.getElementsByClassName('export_modal_bg')[0].style.display='none'
+    })
+    // 선택한 내보내기 모달창 확인 버튼
+    document.querySelectorAll('.export_modal_bg button')[1].addEventListener('click',function(){
+        let check = document.getElementsByName('check')
+        let ids = []
+        let loginIds = true
+        for (let i = 0; i < check.length; i++) {
+            if (check[i].checked) {
+                if(check[i].parentNode.parentNode.querySelectorAll("td")[5].querySelector("p").id !== document.querySelector(".lnb_user p").name) loginIds = false
+                ids.push(parseInt(check[i].value))
+            }
+        }
+        //  모듈파일과 동일 디렉토리에 있는 파일 및 디렉토리들도 포함여부
+        let withOtherFile = document.getElementById('with_other_file');
+
+        $.fileDownload('workflow_export', {
+            httpMethod: 'post',
+            data: {ids: ids, withOtherFile: withOtherFile.checked},
+            successCallback: function (data) {
+                table.order(['1','asc']).draw();
+                document.getElementsByClassName('export_modal_bg')[0].style.display='none'
+            },
+            failCallback: function (err) {
+                console.log(err)
+            },
+        })
+
+
+    })
+
+    // 선택안된 내보내기 모달창 확인 버튼
+    document.querySelector('.n_export_modal button').addEventListener('click',function () {
+        document.getElementsByClassName('n_export_modal')[0].style.display = 'none'
+        document.getElementsByClassName('export_modal_bg')[0].style.display='none'
+    })
+    // 선택안된 내보내기 모달창 X 버튼
+    document.querySelector('.n_export_modal img').addEventListener('click',function () {
+        document.getElementsByClassName('n_export_modal')[0].style.display = 'none'
+        document.getElementsByClassName('export_modal_bg')[0].style.display='none'
+    })
+
+
+    //---<가져오기>------
+
+    // 가져오기 이벤트 핸들러 설정
+    document.querySelector(".import").addEventListener("click", function(e){
+
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = _ => {
+            // you can use this method to get file and perform respective operations
+            let files =   Array.from(input.files);
+            console.log(files);
+
+            var form = new FormData();
+            form.append("workflowExportFile", files[0]);
+
+            $.ajax({
+                url: "/workflow_import"
+                , type : "POST"
+                , processData : false
+                , contentType : false
+                , data : form
+                , enctype : "multipart/form-data"
+                , success: function (response){
+                    if (response.status == 'SUCCESS'){
+                        document.getElementsByClassName('import_complete_modal_bg')[0].style.display = 'inline'
+                    }else{
+                        document.getElementsByClassName('import_fail_txt')[0].value = response.errorMessage;
+                        document.getElementsByClassName('import_fail_modal_bg')[0].style.display = 'inline'
+                    }
+                    table.order(['1','asc']).draw();
+                }, error: function (jqXHR){
+                    alert(jqXHR.responseText)
+                }
+            })
+
+        };
+        input.click();
+
+
+    })
+    // 가져오기 완료 모달창 확인 버튼
+    document.querySelector('.import_complete_modal button').addEventListener('click',function () {
+        document.getElementsByClassName('import_complete_modal')[0].style.display = 'none'
+        document.getElementsByClassName('import_complete_modal_bg')[0].style.display='none'
+    })
+    // 가져오기 완료 모달창 X 버튼
+    document.querySelector('.import_complete_modal_bg img').addEventListener('click',function () {
+        document.getElementsByClassName('import_complete_modal')[0].style.display = 'none'
+        document.getElementsByClassName('import_complete_modal_bg')[0].style.display='none'
+    })
+    // 가져오기 실패 모달창 확인 버튼
+    document.querySelector('.import_fail_modal button').addEventListener('click',function () {
+        document.getElementsByClassName('import_fail_modal')[0].style.display = 'none'
+        document.getElementsByClassName('import_fail_modal_bg')[0].style.display='none'
+    })
+    // 가져오기 실패 모달창 X 버튼
+    document.querySelector('.import_fail_modal_bg img').addEventListener('click',function () {
+        document.getElementsByClassName('import_fail_modal')[0].style.display = 'none'
+        document.getElementsByClassName('import_fail_modal_bg')[0].style.display='none'
+    })
+    //---</가져오기>------
+
+
+
+
     // 삭제
     document.querySelector(".del").addEventListener("click", function(e){
         document.getElementsByClassName('delete_modal_bg')[0].style.display='inline'

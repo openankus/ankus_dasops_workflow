@@ -1,21 +1,30 @@
 package org.ankus.workflow.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.ankus.file.service.FileManageSvc;
 import org.ankus.workflow.model.*;
 import org.ankus.workflow.repository.ModuleExecConfRepsitory;
 import org.ankus.workflow.repository.WorkflowRepository;
 import org.ankus.workflow.repository.WorkflowStepRepository;
 import org.ankus.util.DataTable;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.ankus.workflow.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.zeroturnaround.zip.ZipUtil;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,8 +101,25 @@ public class WorkflowSvc {
     ModuleExecHistRepository moduleExecHistRepository;
 
 
+    /**
+     * 워크플로우 실행이력 데이터 접근 객체
+     */
     @Autowired
     WorkflowExecHistRepositorySupport workflowExecHistRepositorySupport;
+
+    /**
+     * 파일 관리 서비스 객체
+     */
+    @Autowired
+    FileManageSvc fileManageSvc;
+
+
+    /**
+     * 사용자 작업공간 디렉터리
+     */
+    @Value("${ankus.jupyter.workspace}")
+    private String ankusUserWorkspace;
+
 
 
     public WorkflowSvc(){
@@ -261,57 +287,273 @@ public class WorkflowSvc {
         return workflowRepository.save(workflow).getActFlag();
     }
 
+    /**
+     * 워크플로우들을 복사하여 생성
+     *
+     * @param ids 복사할 워크플로우들의 ID 목록
+     * @param copyUser 복사하는 사용자의 ID
+     */
     public void workflowCopy(List<Long> ids, String copyUser){
 
         for (Long id : ids){
             // 복사할 워크플로우 정보 로드
             Workflow workflow = workflowRepository.getById(id);
 
-
             // 복사 워크플로우 생성
-            Workflow copyWorkflow = new Workflow();
+            Workflow copyWorkflow = this.copy(workflow);
             copyWorkflow.setName(
                     workflow.getName()+" - 복사본"+DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now()));
-            copyWorkflow.setActFlag(Flag.N);
-            copyWorkflow.setExecCondType(workflow.getExecCondType());
-            List<DayOfWeek> copyDayList = new ArrayList<DayOfWeek>();
-            for (DayOfWeek dow : workflow.getExecCondDayList()){
-                copyDayList.add(dow);
-            }
-            copyWorkflow.setExecCondDayList(copyDayList);
-            copyWorkflow.setExecCondHour(workflow.getExecCondHour());
-            copyWorkflow.setExecCondMin(workflow.getExecCondMin());
-            copyWorkflow.setExecCondCronExp(workflow.getExecCondCronExp());
-            copyWorkflow.setExecCondEventName(workflow.getExecCondEventName());
-            copyWorkflow.setCreateUser(workflow.getCreateUser());
-            // 복사 워크플로우 단계 생성
-            List<WorkflowStep> copyWorkflowStepList = new ArrayList<WorkflowStep>();
-            for (WorkflowStep workflowStep : workflow.getWorkflowStepList()) {
-                WorkflowStep copyWorkflowStep = new WorkflowStep();
-                copyWorkflowStep.setNum(workflowStep.getNum());
-                // 복사 모듈 실행설정 생성
-                List<ModuleExecConf> moduleExecConfList = new ArrayList<ModuleExecConf>();
-                for (ModuleExecConf moduleExecConf : workflowStep.getModuleExecConfList()){
-                    ModuleExecConf copyModuleExecConf = new ModuleExecConf();
-                    copyModuleExecConf.setNum(moduleExecConf.getNum());
-                    copyModuleExecConf.setName(moduleExecConf.getName());
-                    copyModuleExecConf.setModuleFilePath(moduleExecConf.getModuleFilePath());
-                    List<String> cmdArgList = new ArrayList<String>();
-                    for (String cmdArg : moduleExecConf.getCmdArgList()){
-                        cmdArgList.add(cmdArg);
-                    }
-                    copyModuleExecConf.setCmdArgList(cmdArgList);
-                    moduleExecConfList.add(copyModuleExecConf);
-                }
-                copyWorkflowStep.setModuleExecConfList(moduleExecConfList);
-                copyWorkflowStepList.add(copyWorkflowStep);
-            }
-            copyWorkflow.setWorkflowStepList(copyWorkflowStepList);
 
             //  복사한 워크플로우 저장
             workflowRepository.save(copyWorkflow);
         }
     }
+
+
+    /**
+     * 워크플로우들을 내보내기
+     *
+     * @param ids 복사할 워크플로우들의 ID 목록
+     * @param withOtherFile 동일 디렉터리내에 있는 다른 파일 및 폴더들도 포함할 할지 여부
+     * @return 내보내기용 zip 파일의 경로
+     */
+    public String workflowExport(List<Long> ids, Boolean withOtherFile) throws IOException{
+
+        //  export 파일을 만들기 위한 임시 디렉토리 생성
+        Path workflowExportDir = Files.createTempDirectory("workflow_export_");
+
+        //---<모듈파일을 복사>---
+        {
+            //---<모듈파일 경로 목록 추출>----
+            Set<String> filePathSet = new HashSet<String>();
+            //  모듈파일 경로 수집
+            for (Long id : ids) {
+                Workflow workflow = workflowRepository.getById(id);
+                for (WorkflowStep workflowStep : workflow.getWorkflowStepList()) {
+                    for (ModuleExecConf moduleExecConf : workflowStep.getModuleExecConfList()){
+                        filePathSet.add(moduleExecConf.getModuleFilePath());
+                    }
+                }
+            }
+            if (withOtherFile){
+                //  동일 디렉터리내에 있는 다른 파일 및 폴더들도 포함
+                File ankusWorkspaceDir = new File(ankusUserWorkspace);
+                for (String filePath : new ArrayList<String>(filePathSet)){
+                    File file = new File(ankusUserWorkspace, filePath);
+                    int rootPathLength = ankusWorkspaceDir.getAbsolutePath().length();
+                    for (File brotherFile: file.getParentFile().listFiles()){
+                        filePathSet.add(brotherFile.getAbsolutePath().substring(rootPathLength));
+                    }
+                }
+            }
+            
+            List<String> filePathList  = new ArrayList<String>();
+            filePathList.addAll(filePathSet);
+            //---</모듈파일 경로 목록 추출>----
+
+            //  모듈 파일들을 담을 디렉토리 생성
+            File moduleFileDir = new File(workflowExportDir.toAbsolutePath().toString(), "module_file");
+            moduleFileDir.mkdirs();
+            // file들을 담을 임시 디렉토리를 생성
+            for (String filePath : filePathList){
+                File fromFile = new File(ankusUserWorkspace, filePath);
+                File toFile = new File(moduleFileDir, filePath);
+                // 파일이 담겨져 있는 하위 디렉터리 생성
+                toFile.getParentFile().mkdirs();
+                // 파일복사 생성
+                if (fromFile.isDirectory()){
+                    FileUtils.copyDirectory(fromFile, toFile);
+                }else{
+                    FileUtils.copyFile(fromFile, toFile, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        }
+        //---</모듈파일을 복사>---
+
+        //---<워크플로우 목록을 직렬화 저장>---
+        {
+            //---<워크플로우 목록 추출>----
+            List<Workflow> exportWorkflowList = new ArrayList<Workflow>();
+            for (Long id : ids){
+                // 복사할 워크플로우 정보 로드
+                Workflow workflow = workflowRepository.getById(id);
+                Workflow copyWorkflow = this.copy(workflow);
+
+                //  복사한 워크플로우 저장
+                exportWorkflowList.add(copyWorkflow);
+            }
+            //---</워크플로우 목록 추출>----
+
+            File workflowListObjFile = new File(workflowExportDir.toAbsolutePath().toString(), "workflowList.obj");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(workflowListObjFile));
+            objectOutputStream.writeObject(exportWorkflowList);
+            objectOutputStream.close();
+        }
+        //---</워크플로우 목록을 직렬화 저장>---
+
+
+        //---<파이썬 실행환경 정보릎 파일로 저장>---
+        {
+            //  실행환경 정보 얻기
+            String runtimeEnvInfo = pythonUtil.getRuntimeEnvInfo();
+
+            File pythonRuntimeEnvInfoFile =
+                    new File(workflowExportDir.toAbsolutePath().toString(), "pythonRuntimeEnvInfo.txt");
+            FileWriter fw = new FileWriter(pythonRuntimeEnvInfoFile);
+            fw.write(runtimeEnvInfo);
+            fw.close();
+        }
+        //---</파이썬 실행환경 정보릎 파일로 저장>---
+
+        //---<내보내기용 디렉토리를 zip 파일로 저장>---
+        Path zipFilePath = Files.createTempFile("workflowExport_", ".zip");		//임시 ZIP 압축 파일명
+        ZipUtil.pack(workflowExportDir.toFile(), zipFilePath.toFile());
+        //---</내보내기용 디렉토리를 zip 파일로 저장>---
+
+        // 내보내기용 디렉토리 지우기
+        FileUtils.deleteDirectory(workflowExportDir.toFile());
+
+        return zipFilePath.toFile().getAbsolutePath();
+    }
+
+
+    /**
+     * 워크플로우 내보내기 파일을 기반으로 가져오기 실행
+     *
+     * @param workflowExportFile 워크플로우 내보내기 파일
+     * @return 예러 메시지(에러가 없을경우, null 반환)
+     */
+    public String workflowImport(MultipartFile workflowExportFile){
+
+        String errorMessage = null;
+        try{
+            //  내보내기용 임시파일 생성
+            Path zipFilePath = Files.createTempFile("workflowExport_", ".zip");
+            //  내보내기용 파일 저장
+            workflowExportFile.transferTo(zipFilePath);
+
+
+            //  export 파일의 압축을 풀기위한 임시 디렉토리 생성
+            Path workflowExportDir = Files.createTempDirectory("workflow_export_");
+
+            //  export 파일의 압축을 풀기
+            ZipUtil.unpack(zipFilePath.toFile(), workflowExportDir.toFile());
+
+
+            //---<모듈파일을 복사>---
+            File moduleFileDir = new File(workflowExportDir.toAbsolutePath().toString(), "module_file");
+            if (moduleFileDir.isDirectory()){
+                File targetDir = new File(ankusUserWorkspace);
+                for (File moduleFile : moduleFileDir.listFiles()){
+                    if (moduleFile.isDirectory()){
+                        FileUtils.copyDirectoryToDirectory(moduleFile, targetDir);
+                    }else{
+                        FileUtils.copyFileToDirectory(moduleFile, targetDir);
+                    }
+                }
+            }
+            //---</모듈파일을 복사>---
+
+
+            //---<워크플로우 직렬화 파일을 로드>---
+            {
+                File workflowListObjFile = new File(workflowExportDir.toAbsolutePath().toString(), "workflowList.obj");
+                ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(workflowListObjFile));
+                List<Workflow> workflowList = (List<Workflow>) objectInputStream.readObject();
+
+                //  가져오기된 워크플로우를 저장(식별을 위해 이름 수정)
+                for (Workflow workflow : workflowList){
+                    workflow.setName("[가져오기"+DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now())+" ] "+workflow.getName());
+                    workflowRepository.save(workflow);
+                }
+            }
+            //---</워크플로우 직렬화 파일을 로드>---
+
+
+            //---<파이썬 실행환경 정보 파일을 저장>---
+            {
+
+                File infoFile = new File(workflowExportDir.toAbsolutePath().toString(), "pythonRuntimeEnvInfo.txt");
+                File targetDir = new File(ankusUserWorkspace);
+                File targetFile =
+                        new File(ankusUserWorkspace,
+                                "importWorkflowRuntimeEnvInfo_"+DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now())+".txt");
+                FileUtils.moveFile(infoFile, targetFile);
+            }
+            //---</파이썬 실행환경 정보 파일을 저장>---
+
+
+            //  파일삭제를 위한 가비지 콜랙션 수행
+            System.gc();
+
+            //  임시 디렉토리 삭제
+            FileUtils.forceDelete(workflowExportDir.toFile());
+
+            //  내보내기용 파일 삭제
+            FileUtils.forceDelete(zipFilePath.toFile());
+        }catch (IOException | ClassNotFoundException e){
+            errorMessage = "내보내기 파일을 읽는 도중 에러가 발생하였습니다.";
+            log.info(errorMessage, e);
+        }
+
+        return errorMessage;
+    }
+
+
+
+
+    /**
+     * 복사 워크플로우를 생성 (해당 워크플로우는 비영속적임. 즉, JPA가 관리하지 않음)
+     * (단, 워크플로우 활성화는 비활성로 설정.)
+     *
+     * @param workflow 복사할 워크플로우
+     *
+     * @return 복사된 워크플로우
+     */
+    public Workflow copy(Workflow workflow){
+        // 복사 워크플로우 생성
+        Workflow copyWorkflow = new Workflow();
+        copyWorkflow.setName(workflow.getName());
+        copyWorkflow.setActFlag(Flag.N);
+        copyWorkflow.setExecCondType(workflow.getExecCondType());
+        List<DayOfWeek> copyDayList = new ArrayList<DayOfWeek>();
+        for (DayOfWeek dow : workflow.getExecCondDayList()){
+            copyDayList.add(dow);
+        }
+        copyWorkflow.setExecCondDayList(copyDayList);
+        copyWorkflow.setExecCondHour(workflow.getExecCondHour());
+        copyWorkflow.setExecCondMin(workflow.getExecCondMin());
+        copyWorkflow.setExecCondCronExp(workflow.getExecCondCronExp());
+        copyWorkflow.setExecCondEventName(workflow.getExecCondEventName());
+        copyWorkflow.setCreateUser(workflow.getCreateUser());
+        // 복사 워크플로우 단계 생성
+        List<WorkflowStep> copyWorkflowStepList = new ArrayList<WorkflowStep>();
+        for (WorkflowStep workflowStep : workflow.getWorkflowStepList()) {
+            WorkflowStep copyWorkflowStep = new WorkflowStep();
+            copyWorkflowStep.setNum(workflowStep.getNum());
+            // 복사 모듈 실행설정 생성
+            List<ModuleExecConf> moduleExecConfList = new ArrayList<ModuleExecConf>();
+            for (ModuleExecConf moduleExecConf : workflowStep.getModuleExecConfList()){
+                ModuleExecConf copyModuleExecConf = new ModuleExecConf();
+                copyModuleExecConf.setNum(moduleExecConf.getNum());
+                copyModuleExecConf.setName(moduleExecConf.getName());
+                copyModuleExecConf.setModuleFilePath(moduleExecConf.getModuleFilePath());
+                List<String> cmdArgList = new ArrayList<String>();
+                for (String cmdArg : moduleExecConf.getCmdArgList()){
+                    cmdArgList.add(cmdArg);
+                }
+                copyModuleExecConf.setCmdArgList(cmdArgList);
+                moduleExecConfList.add(copyModuleExecConf);
+            }
+            copyWorkflowStep.setModuleExecConfList(moduleExecConfList);
+            copyWorkflowStepList.add(copyWorkflowStep);
+        }
+        copyWorkflow.setWorkflowStepList(copyWorkflowStepList);
+
+        return copyWorkflow;
+    }
+
+
 
     /**
      * 워크플로우 삭제

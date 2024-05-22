@@ -1,5 +1,7 @@
 package org.ankus.workflow.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ankus.service.UserService;
 import org.ankus.workflow.model.*;
@@ -11,14 +13,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -163,7 +167,7 @@ public class WorkflowController {
         workflowSvc.workflowOnDemandStop(id);
     }
 
-    // 특정 워크플로우 목록 삭제
+    // 특정 워크플로우 목록 복사
     @PostMapping(value="workflow_copy")
     @ResponseBody
     public void workflowCopy(@RequestParam(value="ids[]") List<Long> ids, Principal principal){
@@ -172,6 +176,81 @@ public class WorkflowController {
         workflowSvc.workflowCopy(ids, copyUser);
         log.info("</workflow 복사(사용자:"+copyUser+" / ids: "+ ids.toString()+ ")");
     }
+
+    // 특정 워크플로우 목록 내보내기
+    @PostMapping(value="workflow_export")
+    @ResponseBody
+    public void workflowExport(@RequestParam(value="ids[]") List<Long> ids, @RequestParam(value="withOtherFile") Boolean withOtherFile, HttpServletResponse response) throws IOException {
+        log.info("<workflow 내보내기(ids: "+ ids.toString()+ ")");
+
+
+        System.out.println(withOtherFile);
+
+
+        File exportFile = new File(workflowSvc.workflowExport(ids, withOtherFile));
+
+        System.out.println(exportFile);
+
+        response.setContentType("application/zip");
+        response.addHeader("Set-Cookie", "fileDownload=true; path=/");
+        response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.addHeader("Content-Disposition", "attachment;filename=workflowExport.zip");
+
+
+        FileInputStream fis = new FileInputStream(exportFile);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        ServletOutputStream so = response.getOutputStream();
+        BufferedOutputStream bos = new BufferedOutputStream(so);
+
+        //  다운로드 압축파일을 읽기
+        int n = 0;
+        byte[] buffer = new byte[1024];
+        while((n = bis.read(buffer)) > 0){
+            bos.write(buffer, 0, n);
+            bos.flush();
+        }
+
+        if(bos != null) bos.close();
+        if(bis != null) bis.close();
+        if(so != null) so.close();
+        if(fis != null) fis.close();
+        //파일다운로드 END
+
+        // 내보내기용 압축파일 삭제
+        exportFile.delete();
+
+        log.info("</workflow 내보내기(ids: "+ ids.toString()+ ")");
+    }
+
+
+    /**
+     * 워크플로우 가져오기
+     *
+     * @param request 요청 정보를 담은 객체
+     * @return 삭제 여부
+     */
+    @RequestMapping(value ="workflow_import")
+    @ResponseBody
+    public Map<String, Object> workflowImport(MultipartHttpServletRequest request){
+
+        String errorMessage = null;
+        for(MultipartFile mf : request.getFiles("workflowExportFile")){
+            errorMessage = workflowSvc.workflowImport(mf);
+        }
+
+
+        //  JSON 문자열 만들기
+        Map<String, Object> response = new HashMap<String, Object>();
+        if (errorMessage != null){
+            response.put("status", "FAIL");
+            response.put("errorMessage", errorMessage);
+        }else{
+            response.put("status", "SUCCESS");
+        }
+
+        return response;
+    }
+
 
     // 특정 워크플로우 목록 삭제
     @PostMapping(value="workflow_delete")

@@ -129,6 +129,131 @@ html, body {
   height: 34px;
 }
 
+
+
+.export_modal_bg {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  z-index: 500;
+  display: none;
+}
+.export_modal {
+  width: 600px;
+  height: 250px;
+  background-color: #fff;
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding-top: 60px;
+  text-align: center;
+  line-height: 1.4;
+}
+.export_modal .export_txt {
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.export_modal .export_txt2 {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.export_modal img {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 560px;
+  top: 20px;
+  z-index: 9999;
+  cursor: pointer;
+}
+.export_modal .modal_btn_list li:first-child button {
+  width: 100px;
+  height: 36px;
+  color: #0055CC;
+  border: 1px solid #c7c7c7;
+  border-radius: 5px;
+  background-color: transparent;
+  font-size: 1.6rem;
+  font-weight: 400;
+  cursor: pointer;
+  position: absolute;
+  left: 190px;
+  top: 156px;
+}
+.export_modal .modal_btn_list li:last-child button {
+  width: 100px;
+  height: 36px;
+  color: #fff;
+  background-color: #c91706;
+  border-radius: 5px;
+  font-size: 1.6rem;
+  font-weight: 400;
+  cursor: pointer;
+  position: absolute;
+  left: 304px;
+  top: 156px;
+  vertical-align: middle;
+}
+.export_modal .modal_btn_list li button:active {
+  width: 98px;
+  height: 34px;
+}
+.n_export_modal {
+  width: 600px;
+  height: 250px;
+  background-color: #fff;
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding-top: 50px;
+  text-align: center;
+  line-height: 2.5;
+  background-image: url('../../common/images/file/warning.svg');
+  background-repeat: no-repeat;
+  background-position: 50% 22%;
+  background-size: 30px;
+  display: none;
+}
+.n_export_modal .n_export_txt {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-top: 30px;
+}
+.n_export_modal img {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 560px;
+  top: 22px;
+  z-index: 9999;
+  cursor: pointer;
+}
+.n_export_modal button {
+  width: 80px;
+  height: 36px;
+  color: #fff;
+  background-color: #001b54;
+  border-radius: 5px;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-top: 30px;
+  cursor: pointer;
+}
+.n_export_modal button:active {
+  width: 78px;
+  height: 34px;
+}
+
+
 .delete_modal_bg {
   width: 100%;
   height: 100%;
@@ -245,6 +370,125 @@ html, body {
   width: 78px;
   height: 34px;
 }
+
+.import_complete_modal_bg {
+  width: 100%;
+  min-width: 1300px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  z-index: 500;
+  display: none;
+}
+.import_complete_modal {
+  width: 600px;
+  height: 250px;
+  background-color: #fff;
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding-top: 50px;
+  text-align: center;
+  line-height: 2.5;
+  background-image: url('../../common/images/file/complete.svg');
+  background-repeat: no-repeat;
+  background-position: 50% 22%;
+  background-size: 30px;
+}
+.import_complete_modal .import_complete_txt {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-top: 30px;
+}
+.import_complete_modal img {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 560px;
+  top: 20px;
+  z-index: 9999;
+  cursor: pointer;
+}
+.import_complete_modal button {
+  width: 80px;
+  height: 36px;
+  color: #fff;
+  background-color: #001b54;
+  border-radius: 5px;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-top: 30px;
+  cursor: pointer;
+}
+.import_complete_modal button:active {
+  width: 78px;
+  height: 34px;
+}
+
+
+
+.import_fail_modal_bg {
+  width: 100%;
+  min-width: 1300px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  z-index: 500;
+  display: none;
+}
+.import_fail_modal {
+  width: 600px;
+  height: 250px;
+  background-color: #fff;
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding-top: 50px;
+  text-align: center;
+  line-height: 2.5;
+  background-image: url('../../common/images/file/warning.svg');
+  background-repeat: no-repeat;
+  background-position: 50% 22%;
+  background-size: 30px;
+}
+.import_fail_modal .import_fail_txt {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-top: 30px;
+}
+.import_fail_modal img {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 560px;
+  top: 20px;
+  z-index: 9999;
+  cursor: pointer;
+}
+.import_fail_modal button {
+  width: 80px;
+  height: 36px;
+  color: #fff;
+  background-color: #001b54;
+  border-radius: 5px;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-top: 30px;
+  cursor: pointer;
+}
+.import_fail_modal button:active {
+  width: 78px;
+  height: 34px;
+}
+
+
+
 .complete_modal_bg {
   width: 100%;
   min-width: 1300px;
