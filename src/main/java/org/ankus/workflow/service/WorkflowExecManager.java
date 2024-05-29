@@ -129,9 +129,14 @@ public class WorkflowExecManager {
                 //  콘솔출력 로그파일 삭제
                 for (WorkflowStepExecHist workflowStepExecHist : workflowExecHist.getWorkflowStepExecHistList()){
                     for (ModuleExecHist moduleExecHist : workflowStepExecHist.getModuleExecHistList()){
-                        File file = new File(moduleExecHist.getConOutFilePath());
-                        file.delete();
-                        log.info("콘솔로그 파일 삭제: "+file.getAbsolutePath());
+                        // 나중에 확인해보자. moduleExecHist.getConOutFilePath() == null
+                        if (moduleExecHist.getConOutFilePath() != null){
+                            File file = new File(moduleExecHist.getConOutFilePath());
+                            file.delete();
+                            log.info("콘솔로그 파일 삭제: "+file.getAbsolutePath());
+                        }else{
+                            log.info("콘솔로그 파일 삭제 실패\n실행명령어: "+ moduleExecHist.getCmdLine());
+                        }
                     }
                 }
 
