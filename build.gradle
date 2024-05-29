@@ -59,6 +59,9 @@ dependencies {
 
 
 	implementation project(':ankus_dasops_common') // 없으면 login 화면 안보임
+
+	// Cron 에 연도 추가를 위해 사용
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 }
 
 subprojects {
@@ -111,6 +114,10 @@ subprojects {
 		implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.2-rc'
 
 		implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+
+
+		// Cron 에 연도 추가를 위해 사용
+		implementation 'org.quartz-scheduler:quartz:2.3.2'
 	}
 
 	test {

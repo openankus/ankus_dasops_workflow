@@ -3,8 +3,14 @@ package org.ankus.workflow.service;
 import lombok.extern.slf4j.Slf4j;
 import org.ankus.workflow.model.*;
 import org.ankus.workflow.repository.WorkflowRepository;
+import org.quartz.CronScheduleBuilder;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -15,6 +21,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+
 
 /**
  * 시간주기 워크플로우 실행 요청기
@@ -34,6 +41,7 @@ public class PeriodWorkflowExecRequestor {
      * 시간주기 실행조건 워크플로우의 실행요청을 관리하는 스케줄러
      */
     ThreadPoolTaskScheduler scheduler;
+    TaskScheduler taskScheduler;
 
     /**
      * 워크플로우의 이전 갱신일시를 담은 맵
@@ -116,14 +124,15 @@ public class PeriodWorkflowExecRequestor {
                     //  크론식 생성
                     cronExp = createCronExp(workflow.getExecCondDayList(), workflow.getExecCondHour(), workflow.getExecCondMin());
                 }
-                Trigger trigger = new CronTrigger(cronExp);
-                log.debug("워크플로우 스케줄 활성화(워크플로우 ID: "+workflow.getId()+" ,크론식: "+ cronExp+" )");
+//                Trigger trigger = new CronTrigger(cronExp);
+//                Trigger trigger = new CronTrigger(cronExp);
 
+                log.info("워크플로우 스케줄 활성화(워크플로우 ID: "+workflow.getId()+" ,크론식: "+ cronExp +" )" );
 
                 //  워크플로우 실행 요청 스케줄 등록
-                ScheduledFuture scheduledFuture =
-                        scheduler.schedule(new WorkflowExecJob(workflow.getId(), workflow.getName()), trigger);
-
+                ScheduledFuture<?> scheduledFuture =
+//                        scheduler.schedule(new WorkflowExecJob(workflow.getId(), workflow.getName()), trigger);
+                        taskScheduler.schedule(new WorkflowExecJob(workflow.getId(), workflow.getName()), new CronTrigger(cronExp, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
 
                 //  워크플로우 실행 요청 스케줄 맵 등록
                 workflowExecScheduleMap.put(workflow.getId(), scheduledFuture);
@@ -150,19 +159,35 @@ public class PeriodWorkflowExecRequestor {
                         //  기존 스케줄 제거
                         workflowExecScheduleMap.remove(workflow.getId());
 
-                        //  워크플로우 실행 Trigger 생성
+                        // 워크플로우 실행 Trigger 생성
+                        // 실행조건이 [cron 형식]이면 cronExp로 바로 넘어오고
+                        // 실행조건이 [요일 및 시각]이면 cronExp를 재생성 하는 형태로 만듦
+                        // 만든 실행조건에 일치하는 시간이 되면 scheduler를 이용해서 실행
+                        /*
+                        TODO: 2024.05.29 cron 형식으로 입력 받을때, cron 표현 필드가 6개뿐이라서, 7개 필드 입력값을 받지 못한다.
+                         7번째 필드 연도를 입력 받기 위해 CronTrigger를 대신하여 다른 방식으로 trigger에 값을 등록해야 한다.
+                         필드가 7개일때 trigger를 사용할 수 있는지 여부도 확인되어야 한다.
+                         */
+
                         String cronExp = workflow.getExecCondCronExp();
                         if (ExecCondType.PERIOD_DAY_TIME.equals(workflow.getExecCondType())){
-                            //  크론식 생성
+                            // [요일 및 시각] 입력 내용을 크론 형태로 변경
                             cronExp = createCronExp(workflow.getExecCondDayList(), workflow.getExecCondHour(), workflow.getExecCondMin());
                         }
-                        Trigger trigger = new CronTrigger(cronExp);
-                        log.debug("워크플로우 스케줄 활성화(워크플로우 ID: "+workflow.getId()+" ,크론식: "+ cronExp+" )");
+//                        Trigger trigger = new CronTrigger(cronExp);
+//                        org.quartz.CronTrigger trigger = TriggerBuilder.newTrigger()
+//                                .withSchedule(CronScheduleBuilder.cronSchedule(cronExp))
+//                                .build();
+                        log.info("워크플로우 스케줄 활성화(워크플로우 ID: "+workflow.getId()+" ,크론식: "+ cronExp +" )" );
 
 
                         //  워크플로우 실행 요청 스케줄 등록
+//                        scheduledFuture =
+//                                scheduler.schedule(new WorkflowExecJob(workflow.getId(), workflow.getName()), trigger);
                         scheduledFuture =
-                                scheduler.schedule(new WorkflowExecJob(workflow.getId(), workflow.getName()), trigger);
+                                taskScheduler.schedule(new WorkflowExecJob(workflow.getId(), workflow.getName()), new CronTrigger(cronExp, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
+
+
 
 
                         //  워크플로우 실행 요청 스케줄 맵 등록
@@ -189,10 +214,11 @@ public class PeriodWorkflowExecRequestor {
      * @param condDayList   요일 목록
      * @param condHour  시간
      * @param condMin   분
-     * @return
+     * @return 초 분 시 일 월 요일 연도
      */
     public String createCronExp(List<DayOfWeek> condDayList, Integer condHour, Integer condMin){
-        StringBuffer cronExp = new StringBuffer();
+//        StringBuffer cronExp = new StringBuffer();
+        StringBuilder cronExp = new StringBuilder();
 
         //  초
         cronExp.append(" ");
@@ -224,7 +250,7 @@ public class PeriodWorkflowExecRequestor {
         cronExp.append(" ");
         //  요일
         cronExp.append(" ");
-        if (condDayList.size() > 0){
+        if (!condDayList.isEmpty()){
             List<String> dayList = new ArrayList<String>();
             for (DayOfWeek day : condDayList){
                 if (DayOfWeek.SUNDAY.equals(day)) {
@@ -285,6 +311,4 @@ public class PeriodWorkflowExecRequestor {
 
         }
     }
-
-
 }
