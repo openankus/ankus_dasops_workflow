@@ -46,9 +46,6 @@ dependencies {
 	// dbConnect 연결
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
-	// Maria DB 드라이버
-	implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.2-rc'
-
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
 	// Zip 유틸 라이브러리
@@ -106,9 +103,6 @@ subprojects {
 
 		// dbConnect 연결
 		implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-
-		// Maria DB 드라이버
-		implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.2-rc'
 
 		implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 	}
