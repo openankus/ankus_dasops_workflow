@@ -1,4 +1,4 @@
-# ankus DASOps Workflow Manager
+# ankus DASplanner(Data Analysis Service planner)
 
 ########################################################################### <br>
 This is readme.md file <br>
